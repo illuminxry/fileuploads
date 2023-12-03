@@ -29,12 +29,14 @@ exports.getIndexPage = async (req, res) => { // Added async keyword here
         res.status(500).json({ error: 'Error fetching files' });
     }
 };
-exports.upload = async (req, res) => {
+exports.uploadFile = async (req, res) => {
     try {
+        console.log(req.file);
         // Get file information from req.file
         const { filename, path, mimetype, size } = req.file;
 
         // Insert file details into the database
+        const pool = mysql.createPool(conn);
         const connection = await pool.getConnection();
         const [result] = await connection.query(
             'INSERT INTO uploaded_files (filename, path, mimetype, size) VALUES (?, ?, ?, ?)',
