@@ -1,57 +1,55 @@
-const mysql = require('mysql2/promise');
+const mysql = require("mysql2");
 const multer = require('multer');
 const conn = {
-    host: 'localhost',
-    database: 'uploadfile',
-    user: 'root',
-    password: ''
+        host: 'localhost',
+        database: 'uploadfile',
+        user: 'root',
+        password: ''
 };
 
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'uploads'); // Set your upload directory here
-    },
-    filename: function (req, file, cb) {
-        cb(null, Date.now() + '-' + file.originalname);
-    }
-});
-const upload = multer({ storage: storage });
+        destination: function (req, file, cb) {
+            cb(null, 'uploads'); // Set your upload directory here
+        },
+        filename: function (req, file, cb) {
+            cb(null, Date.now() + '-' + file.originalname);
+        }
+    });
+    const upload = multer({ storage: storage });
 exports.getIndexPage = async (req, res) => { // Added async keyword here
-    try {
-        const pool = mysql.createPool(conn);
-        const connection = await pool.getConnection();
-        const [rows] = await connection.query('SELECT * FROM uploaded_files');
-        connection.release();
+        try {
+                const pool = mysql.createPool(conn);
+                const connection = await pool.getConnection();
+                const [rows] = await connection.query('SELECT * FROM uploaded_files');
+                connection.release();
 
-        res.render('index', { files: rows }); // Pass the 'rows' data to the 'files.ejs' template
-    } catch (err) {
-        console.error('Error fetching files:', err);
-        res.status(500).json({ error: 'Error fetching files' });
-    }
+                res.render('index', { files: rows }); // Pass the 'rows' data to the 'files.ejs' template
+        } catch (err) {
+                console.error('Error fetching files:', err);
+                res.status(500).json({ error: 'Error fetching files' });
+        }
 };
-exports.uploadFile = async (req, res) => {
-    try {
-        console.log(req.file);
-        // Get file information from req.file
-        const { filename, path, mimetype, size } = req.file;
-
-        // Insert file details into the database
-        const pool = mysql.createPool(conn);
-        const connection = await pool.getConnection();
-        const [result] = await connection.query(
-            'INSERT INTO uploaded_files (filename, path, mimetype, size) VALUES (?, ?, ?, ?)',
-            [filename, path, mimetype, size]
-        );
-        connection.release();
-
-        res.redirect('/');
-    } catch (err) {
-        console.error('Error uploading file:', err);
-        res.status(500).json({ error: 'Error uploading file' });
-    }
+exports.upload = async (req, res) => {
+        try {
+                // Get file information from req.file
+                const { filename, path, mimetype, size } = req.file;
+        
+                // Insert file details into the database
+                const connection = await pool.getConnection();
+                const [result] = await connection.query(
+                    'INSERT INTO uploaded_files (filename, path, mimetype, size) VALUES (?, ?, ?, ?)',
+                    [filename, path, mimetype, size]
+                );
+                connection.release();
+        
+                res.redirect('/');
+            } catch (err) {
+                console.error('Error uploading file:', err);
+                res.status(500).json({ error: 'Error uploading file' });
+            }
 }
-exports.download = async (req, res) => {
-    try {
+exports.download= async (req, res) => {
+        try {
         const fileName = req.params.filename;
         // Retrieve the file path from the database based on the provided filename
         const connection = await pool.getConnection();
