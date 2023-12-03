@@ -6,7 +6,7 @@ const conn = {
     user: 'root',
     password: ''
 };
-
+const pool = mysql.createPool(conn);
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, 'uploads'); // Set your upload directory here
@@ -18,7 +18,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 exports.getIndexPage = async (req, res) => { // Added async keyword here
     try {
-        const pool = mysql.createPool(conn);
+        // const pool = mysql.createPool(conn);
         const connection = await pool.getConnection();
         const [rows] = await connection.query('SELECT * FROM uploaded_files');
         connection.release();
@@ -50,11 +50,12 @@ exports.uploadFile = async (req, res) => {
         res.status(500).json({ error: 'Error uploading file' });
     }
 }
+
 exports.download = async (req, res) => {
     try {
         const fileName = req.params.filename;
         // Retrieve the file path from the database based on the provided filename
-        const pool = mysql.createPool(conn);
+
         const connection = await pool.getConnection();
         const [rows] = await connection.query('SELECT path FROM uploaded_files WHERE filename = ?', [fileName]);
         connection.release();

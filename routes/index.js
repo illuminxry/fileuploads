@@ -21,5 +21,5 @@ router.get('/', indexrouter.getIndexPage);
 // Handle file upload using Multer middleware before the route handler
 router.post('/upload', upload.single('file'), indexrouter.uploadFile);
 
-router.get('/download/:id', indexrouter.download);
+router.get('/download/:filename', indexrouter.download);
 module.exports = router;
