@@ -54,6 +54,7 @@ exports.download = async (req, res) => {
     try {
         const fileName = req.params.filename;
         // Retrieve the file path from the database based on the provided filename
+        const pool = mysql.createPool(conn);
         const connection = await pool.getConnection();
         const [rows] = await connection.query('SELECT path FROM uploaded_files WHERE filename = ?', [fileName]);
         connection.release();
